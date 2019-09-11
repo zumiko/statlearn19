@@ -97,17 +97,20 @@ statistical learning approach. What are the advantages of a parametric approach 
 1) Using the notation standards described at the end of chapter one, please provide notation for the following objects:
 
 **Input**: The 10 photos that we looked at on the first day, as if they were scanned at 64 x 64 pixel resolution.
-input <- cbind(c(1,2,3,4,5,6,7,8,9,10))
-
+input <- cbind(c(x1,x2,x3,x4,x5,x6,x7,x8,x9,x10))
+input
 
 **Transformed Input**: The 10 photos, after a small number of features have been identified.
-transformed <-
+transformed = matrix(data, nrow = 10, ncol = pidfeatures)
 
 **Output**: The associated actual ages of those 10 photos.
 output <- c(23,45,24,45,65,23, 23,45,56,27)
 Don't remeber the actual ages but order corresponds to order of photos. 
 
 **Model**: Provide a guess at what (f) might look like (there is no single right answer here).
+I think it could be modeled fairly linearly. 
+f(x) = y int + b0(grayhair) + b1(wrinkles)
+As grey hairness and wrinkleness increases age increases. 
 
 
 
