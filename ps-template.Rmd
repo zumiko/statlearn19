@@ -8,6 +8,8 @@ output: github_document
 
 ### Chapter 2 exercises
 
+### Exercise 1 
+
 1. For each of parts (a) through (d), indicate whether we would generally
 expect the performance of a flexible statistical learning method to be
 better or worse than an inflexible method. Justify your answer.
@@ -27,6 +29,7 @@ non-linear.
 high.
 - In this case, it is probably best to use an inflexible model since with high variance you are more likely to overfit. 
 
+### Exercise 2
 2. Explain whether each scenario is a classification or regression problem, and indicate whether we are most interested in inference or prediction. Finally, provide n and p.
 
 (a) We collect a set of data on the top 500 firms in the US. For each
@@ -48,6 +51,7 @@ change in the US market, the % change in the British market,
 and the % change in the German market.
 -Regression and prediction. n = weeks in a yr ~52 p = 4 
 
+### Exercise 4
 4. You will now think of some real-life applications for statistical learning.
 
 (a) Describe three real-life applications in which classification might
@@ -69,19 +73,42 @@ answer.
 
 (c) Describe three real-life applications in which cluster analysis
 might be useful.
+- If you had the (x,y) coordinates of houses you could try to find cities through clustering. 
+- I think you can use this method to explore personality traits by looking at where things tend to cluster like extroversion or introversion or assertiveness to determine what might be useful traits to look at further. 
+- Maybe you could look at political polarization over time though clustering on data about certain views at the crossectional level and comparing k means to other periods in time. 
 
+### Exercise 5
 5. What are the advantages and disadvantages of a very flexible (versus
 a less flexible) approach for regression or classification? Under what
 circumstances might a more flexible approach be preferred to a less
 flexible approach? When might a less flexible approach be preferred?
+- A more flexible approach is good when you have a large n with less p, the data is very non linear or has clear breakpoints, there is very low variance in the data, the non linearity matches some kind of intuition you have about the data. 
+_ A less flexibe model could be useful when you have a limited amount of observations or lots of regressors to look at, the data clearly appears to be linear, there is large variation in the data, lots of outliers, you are primarily looking for inference over correct prediciton. 
 
+### Exercise 6 
 6. Describe the differences between a parametric and a non-parametric
 statistical learning approach. What are the advantages of a parametric approach to regression or classification (as opposed to a nonparametric approach)? What are its disadvantages?
-
-#### Exercise 1
+- With a non parametric model essentially no assumptions about the true functional form of f are made as opposed to a parametric model. With a parametric model you generally need less observation points, however, the largest disadvantage is that the functional form you choose could be far from the true functional form. 
 
 
 
 ### Additional exercises
+
+1) Using the notation standards described at the end of chapter one, please provide notation for the following objects:
+
+**Input**: The 10 photos that we looked at on the first day, as if they were scanned at 64 x 64 pixel resolution.
+input <- cbind(c(1,2,3,4,5,6,7,8,9,10))
+
+
+**Transformed Input**: The 10 photos, after a small number of features have been identified.
+transformed <-
+
+**Output**: The associated actual ages of those 10 photos.
+output <- c(23,45,24,45,65,23, 23,45,56,27)
+Don't remeber the actual ages but order corresponds to order of photos. 
+
+**Model**: Provide a guess at what (f) might look like (there is no single right answer here).
+
+
 
 
