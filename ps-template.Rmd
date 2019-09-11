@@ -54,16 +54,27 @@ and the % change in the German market.
 be useful. Describe the response, as well as the predictors. Is the
 goal of each application inference or prediction? Explain your
 answer.
+- You could try to predict whether a booking reservation is fraud by the days ahead it is booked, the email server the reservation came from, the time it was booked, and where it was booked. This is prediction cause you only care if it is fraud or not. 
+-You could try to infer things about people from different states by the way they talk, how they dress, how they recreate, and what they like to eat as regressors. This is more inference because youre curious how chracteristics correspond to home state.
+- You could try to predict whether someone will graduate high school by their grades, their test scores, their household income. This is prediction because you're primarily interested in guessing the right outcome. 
+
+
 (b) Describe three real-life applications in which regression might
 be useful. Describe the response, as well as the predictors. Is the
 goal of each application inference or prediction? Explain your
 answer.
+- You could look at the effect of diet, exercise, and ethnicity on height. This is inference because you are curious how the predictors impact height. 
+- You could look at the prices of houses using proximity to a school, number of bedrooms and bathrooms, crime in the area, closeness to a freeway, nearness to a park, and other factors. This is again inference because you are interested in the effect of the factors on a house's price. 
+-You could try longevity based on diet, family history, medical history, social life, stress and other factors. Again, this is inference as you are curious to the effect of the regressors on the variable of interest. 
+
 (c) Describe three real-life applications in which cluster analysis
 might be useful.
+
 5. What are the advantages and disadvantages of a very flexible (versus
 a less flexible) approach for regression or classification? Under what
 circumstances might a more flexible approach be preferred to a less
 flexible approach? When might a less flexible approach be preferred?
+
 6. Describe the differences between a parametric and a non-parametric
 statistical learning approach. What are the advantages of a parametric approach to regression or classification (as opposed to a nonparametric approach)? What are its disadvantages?
 
