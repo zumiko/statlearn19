@@ -1,0 +1,93 @@
+---
+title: "Lab1: Exploratory Data Analysis"
+author: "Claire Jellison"
+date: "9/11/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+* * *
+
+#### Exercise 1
+
+```{r}
+library(MASS)
+?Boston
+```
+
+The data is on the housing values i the suburbs of Boston. There are 506 rows and 14 columns in this data set. The rows correspond to each of the observations and the columns include the crime rate, proportion of residential land zoned for lots over 25,000 sq ft, the proportion of non-retail business acres per town, a river dummy variable, the nitro oxide concentration, the average number of rooms per dwelling, the median value of owner occupied homes and several other characteristics of the observations (suburbs). 
+
+
+#### Exercise 2
+
+```{r}
+library(MASS)
+library(ggplot2)
+# Basic scatter plot
+ggplot(Boston, aes(x=crim, y=medv)) + geom_point()
+ggplot(Boston, aes(x=age, y=medv)) + geom_point()
+
+```
+
+In the first graph, we see that when there is higher rates of crime the median value is lower, however this relationship does not appear to be entirely linear. There are also a lot more observations with low crime rates than higher crime rates. 
+
+In the second graph, we see that a very large proportion of owner occupied units build prior to 1940 seems to generally corresponds with a lower median value although the relationship is somewhat ambiguous and there is a large amount of variance in the data. 
+
+
+
+#### Exercise 3
+
+```{r}
+lm <- lm(crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + black + lstat + medv, data = Boston)
+summary(lm)
+ggplot(Boston, aes(x=dis, y=crim)) + geom_point()
+ggplot(Boston, aes(x=rad, y=crim)) + geom_point()
+ggplot(Boston, aes(x=medv, y=crim)) + geom_point()
+```
+From this it appears that a greater distance to a Boston employment center is correlated with lower per capita crime rate, a higher rad index to a higher crime rate, and a higher median value to a lower crime rate. These relationships can also be seen in the scatterplot.  Some other variables also may have an effect on the crime rate but these are the ones with the lowest p values. 
+
+#### Exercise 4
+Are there any suburbs of Boston that appear to have particularly high crime rates? Tax rate? Pupil-teacher ratios? Comment on the range of each predictor.
+```{r}
+library(plyr)
+t(sapply(Boston, range))
+boxplot(Boston$crim)
+boxplot(Boston$tax)
+boxplot(Boston$ptratio)
+```
+The crime rate per capita has a very large range from close to nothing all the way to 89. The full-value property-tax rate goes from 187 to 711 per $10,000. The pupil to teach ratio goes from around 13 pupils to 1 teacher to 22 pupils per teacher. From the boxplots it looks as though there are some areas that have unusually high crime rates while there are some places with unusually low pupil teacher ratios. 
+
+#### Exercise 5
+How many of the suburbs in this data set bound the Charles river?
+```{r}
+sum(Boston$chas == '1', na.rm=TRUE)
+sum(Boston$chas == '0', na.rm=TRUE)
+```
+This shows that 35 of the suburbs are bound by the Charles River while the other 471 are not. 
+
+#### Exercise 6
+
+```{r}
+median(Boston$ptratio, na.rm = TRUE) 
+```
+The median pupil to teach ratio among the towns in this data set is around 19 pupils to 1 teacher. 
+
+#### Exercise 7
+If you want to build a model to predict the average value of a home based on the other variables, what is your output/response? What is your input?
+```{r}
+lm <- lm(crim ~ zn + indus + chas + nox + rm + age + dis + rad + tax + ptratio + black + lstat + medv, data = Boston)
+lm
+```
+
+The output respose variable would be the average value of a home with the input being a given set of characteristics. So you could give the characteristics of a certain home and the model would predict a value of the home based on the relationships it has seen with previous data. 
+
+
+
+
+
+
+
