@@ -1,3 +1,2 @@
-# claire-jellison
-
-date: 9/10/19
+# Claire Jellison
+Statistical Learning 9/10/19
