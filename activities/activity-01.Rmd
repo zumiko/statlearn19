@@ -1,1 +1,22 @@
 
+
+```{r}
+URL <- "http://andrewpbray.github.io/data/LA.csv"
+LA <- read.csv(URL)
+```
+
+
+```{r}
+
+model <- lm(log(price) ~ log(sqft) + bed + city, data = LA) 
+summary(model)
+```
+
+I think that the geometry of this model is like a plane. 
+
+Seems like the reference level for city is compared to being located in Beverly Hills. 
+
+The coefficient on bed appears to be slightly negative. This seems surprising because I thought that houses with more bedrooms would probably cost more money. Perhaps it is because, there are really expensive small downtown apartments. 
+
+
+
