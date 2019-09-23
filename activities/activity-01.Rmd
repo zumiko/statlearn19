@@ -1,4 +1,9 @@
-
+---
+title: "Activity 1"
+author: "Claire Jellison"
+date: "9/22/2019"
+output: pdf_document
+---
 
 ```{r}
 URL <- "http://andrewpbray.github.io/data/LA.csv"
@@ -12,11 +17,25 @@ model <- lm(log(price) ~ log(sqft) + bed + city, data = LA)
 summary(model)
 ```
 
-I think that the geometry of this model is like a plane. 
+I think that the geometry of this model is like multiple planes. The categorical variable of city seems like it would create 4 parallel planes with the two axes being sqft and bed. 
 
 Seems like the reference level for city is compared to being located in Beverly Hills. 
 
-The coefficient on bed appears to be slightly negative. This seems surprising because I thought that houses with more bedrooms would probably cost more money. Perhaps it is because, there are really expensive small downtown apartments. 
+The coefficient on bed appears to be slightly negative. This seems surprising because houses with more bedrooms would probably cost more money. However it is probably due to the fact that it is strongly correlated with square feet. As seen below, dropping square feet from the model, the coefficient on beds becomes positive. So in the original model, more beds with the same sqrt feet is actually picking up that there is smaller bedrooms as well. 
 
+```{r}
+model2 <- lm(log(price) ~ bed + city, data = LA) 
+summary(model2)
+```
 
+```{r}
+model2 <- lm(log(price) ~ log(sqft) + bed + city + log(sqft):city, data = LA)
+summary(model2)
+```
 
+```{r}
+model3 <- lm(log(price) ~ log(sqft) + bed + log(sqft):bed, data = LA)
+summary(model3)
+```
+ 
+ This creates a twisty plane 
