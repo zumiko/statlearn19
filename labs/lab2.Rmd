@@ -141,22 +141,11 @@ f_hatsim(5)
 #### Exercise 11 
 Now, generate the y’s. Note that you’ll need an estimate of (\sigma^2), for which you can use (\hat{\sigma}^2 = RSS/n - 2). You can extract the vector of residuals with m1$res.
 ```{r}
-meanstations = mean(quakes$stations)
-#meanstations
-stdstations = sd(quakes$stations)
-#stdstations
-
-#sigma = sqrt(m1$res/(n1-2))
-#ysim <- rnorm(n = n1, mean = f_hatsim(xsim), sd = stdstations)
-rss <- sum((x1 - mean(x1))^2)
-mean(rss)
-#rss1 = (m1$res)^2
-#rss1
-sigma = rss/(1000-2)
-mean(sigma)
-error <- rnorm(n = 1000, mean = 0, sd = stdstations)
+sqresid <- m1$res^2
+var_hat <- sum(sqresid)/(1000 - 2)
+stdev = sqrt(var_hat)
+error <- rnorm(n = 1000, mean = 0, sd = stdev)
 mean(error)
-#sd(error)
 ysim1 = f_hat1(xsim) + error
 mean(ysim)
 ```
@@ -168,7 +157,7 @@ ggplot(quakes, (aes(x = xsim, y = ysim1))) + geom_point(position = "jitter")
 
 ```
 
-In the original data there are far more observations around the lower magnitudes. Additionally, I could account for the fact that the standard deviation might not be the same across all x's if the model is not perfectly linear by making an average deviation function as we did with y hat. 
+In the original data there are far more observations around the lower magnitudes.In general, the data appears more linear here, than originally unsurprisingly. 
 
 #### Challenge Problem 
 Use the latitude and longitude data to plot each of these earthquakes in quakes on a map with their magnitude mapped to the size of the plotting character. You may need to add some transparency to prevent overplotting.
@@ -184,6 +173,8 @@ ggplot(quakes, aes(x=lat, y=long)) + geom_point(aes(size = mag, colour = mag, al
 The null hypothesis for the intercept is that it is equal to 0. The null hypothesis for TV is that for an increase in spending in TV advertising there is no effect on sales. The null hypothesis for radio is that for an increase in spending in radio advertising there is no effect on sales. The null hypothesis for newspaper is that for an increase in spending in newspaper advertising there is no effect on sales. Based on the p values, at the 99% confidence level we can reject the null hypothses that the intercept, TV advertising spending, and Radio advertising spending do not have an effect on sales. However, the much higher p value for newspaper, does not allow us to reject the null hypothesis that a change in spending on newspaper advertising has no effect on sales. 
 
 ### CH3 Exercise 4
+
+a) 
 
 ### CH3 Exercise 5
 
