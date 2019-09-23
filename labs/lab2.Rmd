@@ -147,14 +147,14 @@ stdev = sqrt(var_hat)
 error <- rnorm(n = 1000, mean = 0, sd = stdev)
 mean(error)
 ysim1 = f_hat1(xsim) + error
-mean(ysim)
+ysim2 = f_hat1(x1) + error
 ```
 
 #### Exercise 12 
 Finally, make a plot of your simulated data. How is it similar to the original data? How is it different? How might you change your model to make it more consistent with the data?
 ```{r}
 ggplot(quakes, (aes(x = xsim, y = ysim1))) + geom_point(position = "jitter") 
-
+ggplot(quakes, (aes(x = x1, y = ysim2))) + geom_point(position = "jitter") 
 ```
 
 In the original data there are far more observations around the lower magnitudes.In general, the data appears more linear here, than originally unsurprisingly. 
@@ -170,13 +170,48 @@ ggplot(quakes, aes(x=lat, y=long)) + geom_point(aes(size = mag, colour = mag, al
 ### Problem Set 2 ############################# 
 
 ### CH3 Exercise 1
-The null hypothesis for the intercept is that it is equal to 0. The null hypothesis for TV is that for an increase in spending in TV advertising there is no effect on sales. The null hypothesis for radio is that for an increase in spending in radio advertising there is no effect on sales. The null hypothesis for newspaper is that for an increase in spending in newspaper advertising there is no effect on sales. Based on the p values, at the 99% confidence level we can reject the null hypothses that the intercept, TV advertising spending, and Radio advertising spending do not have an effect on sales. However, the much higher p value for newspaper, does not allow us to reject the null hypothesis that a change in spending on newspaper advertising has no effect on sales. 
+The null hypothesis for TV is that for an increase in spending in TV advertising there is no effect on sales. The null hypothesis for radio is that for an increase in spending in radio advertising there is no effect on sales. The null hypothesis for newspaper is that for an increase in spending in newspaper advertising there is no effect on sales. Based on the p values, at the 99% confidence level we can reject the null hypothses that the intercept, TV advertising spending, and Radio advertising spending do not have an effect on sales. However, the much higher p value for newspaper, does not allow us to reject the null hypothesis that a change in spending on newspaper advertising has no effect on sales. 
 
 ### CH3 Exercise 4
 
-a) 
+I collect a set of data (n = 100 observations) containing a single
+predictor and a quantitative response. I then fit a linear regression
+model to the data, as well as a separate cubic regression, i.e. Y =
+β0 + β1X + β2X2 + β3X3 + .
+
+(a) Suppose that the true relationship between X and Y is linear,
+i.e. Y = β0 + β1X + . Consider the training residual sum of
+squares (RSS) for the linear regression, and also the training
+RSS for the cubic regression. Would we expect one to be lower
+than the other, would we expect them to be the same, or is there
+not enough information to tell? Justify your answer.
+
+There is not enough information to be entirely sure. Since the true relationship is linear it is possible that the linear model could have a lower RSS, despite the fact that it is the less flexible model. Then again, the cubic regression could overfit the data in a way that could result in a lower RSS depite the true linear relationship. 
+
+(b) Answer (a) using test rather than training RSS.
+
+With the test, RSS we would expect the linear model to have a lower RSS. THis is because the cubic model likely overfit the training data especially outliers, resulting in a higher RSS with the test data. 
+
+
+(c) Suppose that the true relationship between X and Y is not linear,
+but we don’t know how far it is from linear. Consider the training
+RSS for the linear regression, and also the training RSS for the
+cubic regression. Would we expect one to be lower than the
+other, would we expect them to be the same, or is there not
+enough information to tell? Justify your answer.
+
+We would probably expect the training RSS for the cubic regression to be lower since it has more flexibility to curve and get closer to the data points, while the linear model is very rigid. 
+
+(d) Answer (c) using test rather than training RSS.
+
+Given that the relationship is not linear, I would expect the test RSS for the cubic regression to be lower, since it has more ability to conform to the true relationship whatever that may be. 
 
 ### CH3 Exercise 5
+
+$$
+
+$$
+
 
 ### Additional Exercise 
 
