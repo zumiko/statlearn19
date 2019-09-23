@@ -117,7 +117,7 @@ mean(xsim)
 ```
 
 #### Exercise 10 
-Next, generate your (\hat{y})’s (the value of the mean function at the observed x’s). Please generate them by writing your own function of the form:
+Next, generate your $$\hat{y} $$’s (the value of the mean function at the observed x’s). Please generate them by writing your own function of the form:
 ```{r}
 
 x1 <- quakes$mag
@@ -139,7 +139,7 @@ f_hatsim(5)
 ```
  
 #### Exercise 11 
-Now, generate the y’s. Note that you’ll need an estimate of (\sigma^2), for which you can use (\hat{\sigma}^2 = RSS/n - 2). You can extract the vector of residuals with m1$res.
+Now, generate the y’s. Note that you’ll need an estimate of $$\sigma^2 $$, for which you can use $$ \hat{\sigma}^2 = RSS/n - 2 $$. You can extract the vector of residuals with m1$res.
 ```{r}
 sqresid <- m1$res^2
 var_hat <- sum(sqresid)/(1000 - 2)
@@ -176,11 +176,9 @@ The null hypothesis for TV is that for an increase in spending in TV advertising
 
 I collect a set of data (n = 100 observations) containing a single
 predictor and a quantitative response. I then fit a linear regression
-model to the data, as well as a separate cubic regression, i.e. Y =
-β0 + β1X + β2X2 + β3X3 + .
+model to the data, as well as a separate cubic regression.
 
-(a) Suppose that the true relationship between X and Y is linear,
-i.e. Y = β0 + β1X + . Consider the training residual sum of
+(a) Suppose that the true relationship between X and Y is linear. Consider the training residual sum of
 squares (RSS) for the linear regression, and also the training
 RSS for the cubic regression. Would we expect one to be lower
 than the other, would we expect them to be the same, or is there
