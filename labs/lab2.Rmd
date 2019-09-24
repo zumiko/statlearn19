@@ -157,7 +157,7 @@ ggplot(quakes, (aes(x = xsim, y = ysim1))) + geom_point(position = "jitter")
 ggplot(quakes, (aes(x = x1, y = ysim2))) + geom_point(position = "jitter") 
 ```
 
-In the original data there are far more observations around the lower magnitudes.In general, the data appears more linear here, than originally unsurprisingly. 
+In the original data there are far more observations around the lower magnitudes.In general, the data appears more linear here, than originally unsurprisingly. The residuals also seem more constant across the magnitude values in the simulated data than in the original data. 
 
 #### Challenge Problem 
 Use the latitude and longitude data to plot each of these earthquakes in quakes on a map with their magnitude mapped to the size of the plotting character. You may need to add some transparency to prevent overplotting.
@@ -207,17 +207,44 @@ Given that the relationship is not linear, I would expect the test RSS for the c
 ### CH3 Exercise 5
 
 $$
-
+\begin {aligned} 
+\hat y &= (\sum_{i=1}^{n} x_iy_i /(\sum_{i^{1}=1}^{n} x_i^{2}))x_i 
+ &= (x_ix_1y_1 + x_ix_2y_2 + \dots + x_ix_ny_n)/(x_1^{2} + x_2^{2} + \dots + x_n^{2}) = \sum_{i^{1}=1}^{n}(\frac{x_i\sum_{i=1}^{n}x_i}{x_{i^1}^{2}})y_{i^{1}} = 
+\sum_{i^{1}=1}^{n}a_{i^1}y_{i^{1}}
+\end{aligned}
 $$
-
+Expanding the two sums, we see that we can rearrange them as shown above. So a_i is equal to everything inside the parenthesis in the second to the right equality. 
 
 ### Additional Exercise 
 
 The k-nearest neighbor regression was defined as:
 
 $$[\hat{f}(x) = \frac{1}{k} \sum_{x_i \in \mathcal{N}(x)} y_i]$$
+ 
+$$
+\begin{aligned}
+MSE = E[(y - \hat f)^{2}] = Var(\hat f) + [f - E(\hat f)]^{2} + Var(\epsilon) \\ 
+\end{aligned}
+$$
+We will break up the right hand side into each of the parts. 
 
-This is one of the few models that has a closed form for the bias and the variance. Calculate each and use them to write a decomposition of the expected test MSE its three components. This is an emminently google-able result, but doing so will teach you nothing, so work to do this yourself (or working with each other). It’s not an extensive derivation at all, you just have to be sure you’re careful in your notation. If you’re new to , draw examples from the source files on the website. Please post to slack if you have questions.
+$$
+Var(\hat f) =\frac{\sigma^2}{k}
+$$
+This is by the definition of the variance of the sample mean. We see from the equation above that it is decreasing in k. 
+
+$$
+[f - E(\hat f)]^{2} = [f - E(\frac{1}{k} \sum_{x_i \in \mathcal{N}(x)} y_i)]^{2} = [f - (\frac{1}{k} \sum_{x_i \in \mathcal{N}(x)} E(y_i)]^{2} = [f - (\frac{1}{k} \sum_{x_i \in \mathcal{N}(x)} f(x_i)]^{2} 
+$$
+Since the inside of the sum is constant the whole thing is incerasing in k, since as k increases the total quantity goes up. 
+
+$$ 
+Var(\epsilon) = \sigma^{2}
+$$
+
+$$
+MSE = \frac{\sigma^2}{k} + [f - (\frac{1}{k} \sum_{x_i \in \mathcal{N}(x)} f(x_i)]^{2} + \sigma^{2}
+$$
 
 One you have a form for each of these terms, construct a plot that shows the decomposition of the MSE into its components as a function of (k) (this is a formal version of your sketch from the handout). Use the following as your training data set:
 
@@ -225,11 +252,14 @@ One you have a form for each of these terms, construct a plot that shows the dec
 x <- c(1:3, 5:12)
 y <- c(-7.1, -7.1, .5, -3.6, -2, -1.7, -4, -.2, -1.2, -1.2, -3.5)
 
+sigmasqr = (sd(y))^2 
+sigmasqr
+
 library(tidyverse)
 my_fun <- function(k, x, y) {
   f_k <- rep(NA, length(k))
   for (i in 1:length(k)) {
-    f_k[i] <- sum(k[i] + y + x)
+    f_k[i] <- sigmasqr/k[i]
   }
   f_k
 }
@@ -245,5 +275,29 @@ ggplot(df, aes(x = k, y = f_k)) +
 ```
 
 
+```{r}
+x <- c(1:3, 5:12)
+y <- c(-7.1, -7.1, .5, -3.6, -2, -1.7, -4, -.2, -1.2, -1.2, -3.5)
 
+sigmasqr = (sd(y))^2 
+sigmasqr
+
+library(tidyverse)
+my_fun <- function(k, x, y) {
+  f_k <- rep(NA, length(k))
+  for (i in 1:length(k)) {
+    f_k[i] <- 10 - (1/k[i])*5 #this eqn isn't quite right I'm just using constants 
+  }
+  f_k
+}
+
+k <- 1:10
+f_k <- my_fun(k, x, y)
+
+df <- tibble(k = k, f_k = f_k)
+ggplot(df, aes(x = k, y = f_k)) +
+  geom_line(col = "tomato") +
+  theme_bw() +
+  ylab("bias")
+```
 
