@@ -20,18 +20,17 @@ library(glmnet)
 ### Fitting the model 
 
 ```{r}
-group_D_fit <- function(training_data) {
-  # this function should be self-contained, so include 
-  # any packages you need and any data processing that 
-  # you do.
 
-  d <- read.csv("http://andrewpbray.github.io/data/crime-train.csv")
-  # run lm() to fit your model.
+group_D_fit <- function(training_data) {
+
+  training_data$MalePctDivorce2 <- training_data$MalePctDivorce^2
+  training_data$PctKids2Par2 <- training_data$PctKids2Par^2
+  training_data$PctImmigRec82 <- training_data$PctImmigRec8^2
   
-  # on the last line, simply put m1, your final model.
-  # this will return it as output.
-  m11 <- lm(data = d, ViolentCrimesPerPop ~  factor(state) + racePctWhite + pctUrban  + PctEmploy + MalePctDivorce + MalePctDivorce^2 + PctKids2Par + PctKids2Par^2  + PctWorkMom + PctPersDenseHous  + NumStreet + PctVacantBoarded + PctImmigRec8 + PctImmigRec8^2 + PctIlleg +  PctHousOccup + PctWorkMom*MalePctDivorce + pctUrban*racePctWhite + PctEmploy*racePctWhite + pctUrban*PctHousOccup + PctEmploy*pctUrban + PctIlleg*PctEmploy + PctImmigRec8*PctVacantBoarded + PctNotHSGrad + PctLess9thGrade + NumInShelters+PctEmploy*pctUrban + PctIlleg*PctEmploy + PctImmigRec8*PctVacantBoarded+PctNotHSGrad + PctLess9thGrade + NumInShelters)
-  m11
+  
+m11 <- lm(data = training_data, ViolentCrimesPerPop ~  factor(state) + racePctWhite + pctUrban  + PctEmploy + MalePctDivorce + MalePctDivorce2 + PctKids2Par + PctKids2Par2  + PctWorkMom + PctPersDenseHous  + NumStreet + PctVacantBoarded + PctImmigRec8 + PctImmigRec82 + PctIlleg +  PctHousOccup + PctWorkMom*MalePctDivorce + pctUrban*racePctWhite + PctEmploy*racePctWhite + pctUrban*PctHousOccup + PctEmploy*pctUrban + PctIlleg*PctEmploy + PctImmigRec8*PctVacantBoarded + PctNotHSGrad + PctLess9thGrade + NumInShelters+PctEmploy*pctUrban + PctIlleg*PctEmploy + PctImmigRec8*PctVacantBoarded+PctNotHSGrad + PctLess9thGrade + NumInShelters)
+
+m11
 }
 ```
 
@@ -49,7 +48,7 @@ group_D_MSE <- function(model, data){
 ```
 
 
-
+Started by examining the correlation between the predictor variables and ViolentCrimesPerPop, to get an idea of which ones could be good predictors. 
 ```{r}
 #install.packages("Hmisc")
 #library("Hmisc")
@@ -61,11 +60,9 @@ matrix <- matrix[,"ViolentCrimesPerPop"]
 matrix
 ```
 
-Started by examining the correlation between the predictor variables and ViolentCrimesPerPop.
+
 
 Used a lasso regression approach to decide on the best predictors to include in the model. 
-
-LASSO
 ```{r}
 #set.seed(489)
 #x_vars <- model.matrix(ViolentCrimesPerPop~. , num_only)[,-1]
@@ -86,7 +83,7 @@ LASSO
 #head(final)
 ```
 
-Checked for non linear relationships with the chosen variables and added a couple squared terms where it appeared appropriate. 
+Checked for non linear relationships using residual and normal plots with the chosen variables and added a couple squared terms where it appeared appropriate. 
 ```{r}
 MalePctDivorce2 <- (d$MalePctDivorce)^2
 PctKids2Par2 <-(d$PctKids2Par)^2
@@ -99,20 +96,18 @@ PctImmigRec82 <- (d$PctImmigRec8)^2
 
 ```
 
-Added some interaction terms that impoved the $R^{2}$, adjusted $R^{2}$ and MSE. Looked at plots of residuals.
-
+Added some interaction terms that impoved the $R^{2}$, adjusted $R^{2}$ and MSE. Looked at plots of residuals. Residuals vs fitted values appeared pretty good despite a slight dip. 
 ```{r}
 m7 <- lm(data = d, ViolentCrimesPerPop ~  state + racePctWhite + pctUrban  + PctEmploy + MalePctDivorce + MalePctDivorce2 + PctKids2Par + PctKids2Par2  + PctWorkMom + PctPersDenseHous  + NumStreet + PctVacantBoarded + PctImmigRec8 + PctImmigRec82 + PctIlleg +  PctHousOccup + LemasPctOfficDrugUn + PctWorkMom*MalePctDivorce + pctUrban*racePctWhite + racePctWhite*PctIlleg*PctWorkMom + PctEmploy*racePctWhite + pctUrban*PctHousOccup + PctEmploy*pctUrban + PctIlleg*PctEmploy + PctImmigRec8*PctVacantBoarded + PctNotHSGrad + PctLess9thGrade + NumInShelters) 
 
-
+plot(m7, which=1, col=c("blue")) 
 plot(m7, which=2, col=c("red")) 
 #summary(m7)
 #group_D_MSE(m7, d)
 ```
 
 
-Added back some variables that were not included in the lasso, but improved the model. 
-
+Added back some variables that were not included in the lasso, but improved the model. Noticed some poor residuals at the more extreme values.
 ```{r}
 
 m11 <- lm(data = d, ViolentCrimesPerPop ~  factor(state) + racePctWhite + pctUrban  + PctEmploy + MalePctDivorce + MalePctDivorce^2 + PctKids2Par + PctKids2Par^2  + PctWorkMom + PctPersDenseHous  + NumStreet + PctVacantBoarded + PctImmigRec8 + PctImmigRec8^2 + PctIlleg +  PctHousOccup + PctWorkMom*MalePctDivorce + pctUrban*racePctWhite + PctEmploy*racePctWhite + pctUrban*PctHousOccup + PctEmploy*pctUrban + PctIlleg*PctEmploy + PctImmigRec8*PctVacantBoarded + PctNotHSGrad + PctLess9thGrade + NumInShelters+PctEmploy*pctUrban + PctIlleg*PctEmploy + PctImmigRec8*PctVacantBoarded+PctNotHSGrad + PctLess9thGrade + NumInShelters)
@@ -121,7 +116,7 @@ summary(m11)
 plot(m11, which=2, col=c("red")) 
 ```
 
-Assessed final two models looking by two different criterion statistics. 
+Assessed the final models looking by two different criterion statistics. 
 ```{r}
 AIC(m7)
 BIC(m7)
