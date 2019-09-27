@@ -24,7 +24,8 @@ group_D_fit <- function(training_data) {
   # this function should be self-contained, so include 
   # any packages you need and any data processing that 
   # you do.
-  
+
+  d <- read.csv("http://andrewpbray.github.io/data/crime-train.csv")
   # run lm() to fit your model.
   
   # on the last line, simply put m1, your final model.
