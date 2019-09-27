@@ -1,0 +1,130 @@
+---
+title: "Regression Competition"
+author: "Claire Jellison"
+date: "9/25/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+d <- read.csv("http://andrewpbray.github.io/data/crime-train.csv")
+summary(d)
+library(ggplot2)
+library(glmnet)
+```
+
+
+### Fitting the model 
+
+```{r}
+group_D_fit <- function(training_data) {
+  # this function should be self-contained, so include 
+  # any packages you need and any data processing that 
+  # you do.
+  
+  # run lm() to fit your model.
+  
+  # on the last line, simply put m1, your final model.
+  # this will return it as output.
+  m11 <- lm(data = d, ViolentCrimesPerPop ~  factor(state) + racePctWhite + pctUrban  + PctEmploy + MalePctDivorce + MalePctDivorce^2 + PctKids2Par + PctKids2Par^2  + PctWorkMom + PctPersDenseHous  + NumStreet + PctVacantBoarded + PctImmigRec8 + PctImmigRec8^2 + PctIlleg +  PctHousOccup + PctWorkMom*MalePctDivorce + pctUrban*racePctWhite + PctEmploy*racePctWhite + pctUrban*PctHousOccup + PctEmploy*pctUrban + PctIlleg*PctEmploy + PctImmigRec8*PctVacantBoarded + PctNotHSGrad + PctLess9thGrade + NumInShelters+PctEmploy*pctUrban + PctIlleg*PctEmploy + PctImmigRec8*PctVacantBoarded+PctNotHSGrad + PctLess9thGrade + NumInShelters)
+  m11
+}
+```
+
+##  Computing MSE
+
+```{r}
+group_D_MSE <- function(model, data){
+  n <- nrow(data)
+  ys <- data$ViolentCrimesPerPop 
+  y_hats <- predict(model, data)
+  residuals <- y_hats - ys
+  MSE <- sum(residuals^2)/n
+  MSE
+}
+```
+
+
+
+```{r}
+#install.packages("Hmisc")
+#library("Hmisc")
+bool <- sapply(d, is.numeric)
+num_only <- d[,bool]
+
+matrix <- cor(num_only)
+matrix <- matrix[,"ViolentCrimesPerPop"]
+matrix
+```
+
+Started by examining the correlation between the predictor variables and ViolentCrimesPerPop.
+
+Used a lasso regression approach to decide on the best predictors to include in the model. 
+
+LASSO
+```{r}
+set.seed(489)
+x_vars <- model.matrix(ViolentCrimesPerPop~. , num_only)[,-1]
+y_var <- num_only$ViolentCrimesPerPop
+lambda_seq <- 10^seq(2, -2, by = -.1)
+train = sample(1:nrow(x_vars), nrow(x_vars)/2)
+test = (-train)
+ytest = y[test]
+cv_output <- cv.glmnet(x_vars[train,], y_var[train],
+                       alpha = 1, lambda = lambda_seq)
+best_lam <- cv_output$lambda.min
+lasso.mod <- glmnet(x_vars[train,], y_var[train], alpha = 1, lambda = lambda)
+lasso.pred <- predict(lasso.mod, s = bestlam, newx = x_vars[test,])
+#x <- cor(num_only)
+lasso_best <- glmnet(x_vars[train,], y_var[train], alpha = 1, lambda = best_lam)
+pred <- predict(lasso_best, s = best_lam, newx = x_vars[test,])
+final <- cbind(y_var[test], pred)
+#head(final)
+```
+
+Checked for non linear relationships with the chosen variables and added a couple squared terms where it appeared appropriate. 
+```{r}
+MalePctDivorce2 <- (d$MalePctDivorce)^2
+PctKids2Par2 <-(d$PctKids2Par)^2
+PctImmigRec82 <- (d$PctImmigRec8)^2
+#pctdensehouse2 <- (d$PctPersDenseHous)^2
+#m2 <- lm(data = d, ViolentCrimesPerPop ~ state + racePctWhite + pctUrban + PctUnemployed + PctEmploy + MalePctDivorce + PctKids2Par + PctWorkMom + PctPersDenseHous + NumStreet + PctVacantBoarded + PctImmigRec8 + PctIlleg + PctHousOccup + LemasPctOfficDrugUn) 
+#m3 <- lm(data = d, ViolentCrimesPerPop ~  state + racePctWhite + pctUrban + PctUnemployed + MalePctDivorce + maledivorce2 + PctKids2Par + PctWorkMom + PctPersDenseHous + NumStreet + PctVacantBoarded + PctImmigRec8 + PctIlleg + PctHousOccup + LemasPctOfficDrugUn) 
+#m4 <- lm(data = d, ViolentCrimesPerPop ~  state + racePctWhite + pctUrban + PctUnemployed + MalePctDivorce + maledivorce2 + PctKids2Par + pctkids2par2 + PctWorkMom + PctPersDenseHous + NumStreet + PctVacantBoarded + PctImmigRec8 + PctIlleg + PctHousOccup + LemasPctOfficDrugUn) 
+#ggplot(d, (aes(x = LemasPctOfficDrugUn , y = ViolentCrimesPerPop))) + geom_point(position = "jitter")
+
+```
+
+Added some interaction terms that impoved the $R^{2}$, adjusted $R^{2}$ and MSE. Looked at plots of residuals.
+
+```{r}
+m7 <- lm(data = d, ViolentCrimesPerPop ~  state + racePctWhite + pctUrban  + PctEmploy + MalePctDivorce + MalePctDivorce2 + PctKids2Par + PctKids2Par2  + PctWorkMom + PctPersDenseHous  + NumStreet + PctVacantBoarded + PctImmigRec8 + PctImmigRec82 + PctIlleg +  PctHousOccup + LemasPctOfficDrugUn + PctWorkMom*MalePctDivorce + pctUrban*racePctWhite + racePctWhite*PctIlleg*PctWorkMom + PctEmploy*racePctWhite + pctUrban*PctHousOccup + PctEmploy*pctUrban + PctIlleg*PctEmploy + PctImmigRec8*PctVacantBoarded + PctNotHSGrad + PctLess9thGrade + NumInShelters) 
+
+
+plot(m7, which=2, col=c("red")) 
+#summary(m7)
+#group_D_MSE(m7, d)
+```
+
+
+Added back some variables that were not included in the lasso, but improved the model. 
+
+```{r}
+
+m11 <- lm(data = d, ViolentCrimesPerPop ~  factor(state) + racePctWhite + pctUrban  + PctEmploy + MalePctDivorce + MalePctDivorce^2 + PctKids2Par + PctKids2Par^2  + PctWorkMom + PctPersDenseHous  + NumStreet + PctVacantBoarded + PctImmigRec8 + PctImmigRec8^2 + PctIlleg +  PctHousOccup + PctWorkMom*MalePctDivorce + pctUrban*racePctWhite + PctEmploy*racePctWhite + pctUrban*PctHousOccup + PctEmploy*pctUrban + PctIlleg*PctEmploy + PctImmigRec8*PctVacantBoarded + PctNotHSGrad + PctLess9thGrade + NumInShelters+PctEmploy*pctUrban + PctIlleg*PctEmploy + PctImmigRec8*PctVacantBoarded+PctNotHSGrad + PctLess9thGrade + NumInShelters)
+summary(m11)
+
+plot(m11, which=2, col=c("red")) 
+```
+
+Assessed final two models looking by two different criterion statistics. 
+```{r}
+AIC(m7)
+BIC(m7)
+AIC(m11)
+BIC(m11)
+```
+
