@@ -11,7 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 d <- read.csv("http://andrewpbray.github.io/data/crime-train.csv")
-summary(d)
+#summary(d)
 library(ggplot2)
 library(glmnet)
 ```
@@ -66,22 +66,22 @@ Used a lasso regression approach to decide on the best predictors to include in 
 
 LASSO
 ```{r}
-set.seed(489)
-x_vars <- model.matrix(ViolentCrimesPerPop~. , num_only)[,-1]
-y_var <- num_only$ViolentCrimesPerPop
-lambda_seq <- 10^seq(2, -2, by = -.1)
-train = sample(1:nrow(x_vars), nrow(x_vars)/2)
-test = (-train)
-ytest = y[test]
-cv_output <- cv.glmnet(x_vars[train,], y_var[train],
-                       alpha = 1, lambda = lambda_seq)
-best_lam <- cv_output$lambda.min
-lasso.mod <- glmnet(x_vars[train,], y_var[train], alpha = 1, lambda = lambda)
-lasso.pred <- predict(lasso.mod, s = bestlam, newx = x_vars[test,])
+#set.seed(489)
+#x_vars <- model.matrix(ViolentCrimesPerPop~. , num_only)[,-1]
+#y_var <- num_only$ViolentCrimesPerPop
+#lambda_seq <- 10^seq(2, -2, by = -.1)
+#train = sample(1:nrow(x_vars), nrow(x_vars)/2)
+#test = (-train)
+#ytest = y[test]
+#cv_output <- cv.glmnet(x_vars[train,], y_var[train],
+                       #alpha = 1, lambda = lambda_seq)
+#best_lam <- cv_output$lambda.min
+#lasso.mod <- glmnet(x_vars[train,], y_var[train], alpha = 1, lambda = lambda)
+#lasso.pred <- predict(lasso.mod, s = bestlam, newx = x_vars[test,])
 #x <- cor(num_only)
-lasso_best <- glmnet(x_vars[train,], y_var[train], alpha = 1, lambda = best_lam)
-pred <- predict(lasso_best, s = best_lam, newx = x_vars[test,])
-final <- cbind(y_var[test], pred)
+#lasso_best <- glmnet(x_vars[train,], y_var[train], alpha = 1, lambda = best_lam)
+#pred <- predict(lasso_best, s = best_lam, newx = x_vars[test,])
+#final <- cbind(y_var[test], pred)
 #head(final)
 ```
 
