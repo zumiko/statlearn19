@@ -15,6 +15,7 @@ d <- read.csv("http://andrewpbray.github.io/data/crime-train.csv")
 library(ggplot2)
 library(glmnet)
 library(leaps)
+library(dplyr)
 ```
 
 
@@ -63,9 +64,6 @@ lm(data = training_data, ViolentCrimesPerPop ~
 }
 ```
 
-```{r}
-summary(m11)
-```
 
 
 ##  Computing MSE
@@ -84,7 +82,7 @@ group_D_MSE <- function(model, data){
 ## Process 
 
 ```{r}
-group_D_process() <- function(d){
+group_D_process<- function(d){
   d$MalePctDivorce2 <- d$MalePctDivorce^2
   d$PctKids2Par2 <- d$PctKids2Par^2
   d$PctImmigRec82 <- d$PctImmigRec8^2
