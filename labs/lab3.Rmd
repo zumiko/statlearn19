@@ -14,6 +14,7 @@ d <- read.csv("http://andrewpbray.github.io/data/crime-train.csv")
 #summary(d)
 library(ggplot2)
 library(glmnet)
+library(leaps)
 ```
 
 
@@ -22,17 +23,50 @@ library(glmnet)
 ```{r}
 
 group_D_fit <- function(training_data) {
-
-  training_data$MalePctDivorce2 <- training_data$MalePctDivorce^2
-  training_data$PctKids2Par2 <- training_data$PctKids2Par^2
-  training_data$PctImmigRec82 <- training_data$PctImmigRec8^2
+  group_D_process(training_data)
   
-  
-m11 <- lm(data = training_data, ViolentCrimesPerPop ~  factor(state) + racePctWhite + pctUrban  + PctEmploy + MalePctDivorce + MalePctDivorce2 + PctKids2Par + PctKids2Par2  + PctWorkMom + PctPersDenseHous  + NumStreet + PctVacantBoarded + PctImmigRec8 + PctImmigRec82 + PctIlleg +  PctHousOccup + PctWorkMom*MalePctDivorce + pctUrban*racePctWhite + PctEmploy*racePctWhite + pctUrban*PctHousOccup + PctEmploy*pctUrban + PctIlleg*PctEmploy + PctImmigRec8*PctVacantBoarded + PctNotHSGrad + PctLess9thGrade + NumInShelters+PctEmploy*pctUrban + PctIlleg*PctEmploy + PctImmigRec8*PctVacantBoarded+PctNotHSGrad + PctLess9thGrade + NumInShelters)
+lm(data = training_data, ViolentCrimesPerPop ~  
+            factor(state) 
+          + racePctWhite 
+          + pctUrban  
+          + PctEmploy 
+          + MalePctDivorce 
+          + MalePctDivorce2 
+          + PctKids2Par 
+          + PctKids2Par2  
+          + PctWorkMom 
+          + PctPersDenseHous 
+          + NumStreet 
+          + PctVacantBoarded 
+          + PctImmigRec8 
+          + PctImmigRec82 
+          + PctIlleg 
+          + PctHousOccup 
+          + PctWorkMom*MalePctDivorce 
+          + pctUrban*racePctWhite 
+          + PctEmploy*racePctWhite
+          + pctUrban*PctHousOccup 
+          + PctEmploy*pctUrban 
+          + PctIlleg*PctEmploy 
+          + PctImmigRec8*PctVacantBoarded 
+          + PctNotHSGrad 
+          + PctLess9thGrade 
+          + NumInShelters
+          + PctEmploy*pctUrban 
+          + PctIlleg*PctEmploy 
+          + PctImmigRec8*PctVacantBoarded
+          + PctNotHSGrad 
+          + PctLess9thGrade 
+          + NumInShelters)
 
-m11
+
 }
 ```
+
+```{r}
+summary(m11)
+```
+
 
 ##  Computing MSE
 
@@ -46,6 +80,129 @@ group_D_MSE <- function(model, data){
   MSE
 }
 ```
+
+## Process 
+
+```{r}
+group_D_process() <- function(d){
+  d$MalePctDivorce2 <- d$MalePctDivorce^2
+  d$PctKids2Par2 <- d$PctKids2Par^2
+  d$PctImmigRec82 <- d$PctImmigRec8^2
+  d
+}
+```
+
+
+## Automated Fit Forward
+
+Here, we chose to minimize the BIC. 
+```{r}
+group_D_automated_fit <- function(data){ 
+  install.packages("leaps")
+  library(leaps)
+  
+  data <- data %>%
+    select(population:MedRent, ViolentCrimesPerPop)
+  
+  forward <- regsubsets(ViolentCrimesPerPop ~ ., data = data, 
+                nvmax = 25, method = "forward")
+  sum.fwd <- summary(forward)
+  i <- which.min(sum.fwd$bic)
+  coefs <- coef(forward, i) 
+  predictors <- names(coefs)[-1]
+  f <- as.formula(
+    paste("ViolentCrimesPerPop", 
+          paste(predictors, collapse = " + "), 
+          sep = " ~ "))
+  
+  lm(f, data = data)
+
+  
+}
+
+```
+
+
+Below, we examine the MSE. 
+```{r}
+
+m1 <- group_D_automated_fit(d)
+group_D_MSE(m1, d)
+
+
+```
+
+
+## Automated Fit Backward
+
+Again, we chose the model with the lowest BIC. 
+```{r}
+
+group_D_automated_fit_back <- function(data){ 
+  install.packages("leaps")
+  library(leaps)
+  
+  data <- data %>%
+    select(population:MedRent, ViolentCrimesPerPop)
+  
+  backward <- regsubsets(ViolentCrimesPerPop ~ ., data = data, 
+                nvmax = 25, method = "backward")
+
+  sum.bwd <- summary(backward)
+  
+  i <- which.min(sum.bwd$bic)
+  coefs <- coef(backward, i) 
+  predictors <- names(coefs)[-1]
+  fb <- as.formula(
+    paste("ViolentCrimesPerPop", 
+          paste(predictors, collapse = " + "), 
+          sep = " ~ "))
+  
+  lm(fb, data = data)
+  #summary(b)
+  
+}
+
+```
+
+
+Checking the MSE for the backwards one, we see that it is slightly lower that the forward one and therefore it will be our preferred model. 
+```{r}
+
+m2 <- group_D_automated_fit_back(d)
+summary(m2)
+group_D_MSE(m2, d)
+
+```
+
+
+
+Looking at how the adjusted $$R^{2}$$ and BIC changes with the number of predictors. We see that while the adjusted R^2 keeps creeping upwards with more predictors the BIC is minimized around 7 or 8 predictors. 
+```{r}
+dsmall <- d %>%
+    select(population:MedRent, ViolentCrimesPerPop)
+
+backward <- regsubsets(ViolentCrimesPerPop ~ ., data = dsmall, nvmax = 25, method = "backward")
+forward <- regsubsets(ViolentCrimesPerPop ~ ., data = dsmall, nvmax = 25, method = "forward")
+b <- summary(backward)
+plot(b$bic, type = "l", ylab = "BIC")
+plot(b$adjr2, type = "l", ylab = "Adjusted R^2")
+
+
+f <- summary(forward)
+plot(f$bic, type = "l", ylab = "BIC")
+plot(f$adjr2, type = "l", ylab = "Adjusted R^2")
+
+```
+
+
+```{r}
+forward <- regsubsets(ViolentCrimesPerPop ~ ., data = dsmall, 
+                nvmax = 25, method = "forward")
+attributes(forward)
+
+```
+
 
 
 Started by examining the correlation between the predictor variables and ViolentCrimesPerPop, to get an idea of which ones could be good predictors. 
