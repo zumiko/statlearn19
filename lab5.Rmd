@@ -7,6 +7,7 @@ output: pdf_document
 
 ```{r}
 library(ggplot2)
+library(dplyr)
 ```
 
 
@@ -18,22 +19,91 @@ war <- read.csv("http://www.stat.cmu.edu/~cshalizi/uADA/15/hw/06/ch.csv", row.na
 
 1)Estimate: Fit a logistic regression model for the start of civil war on all other variables except country and year (yes, this makes some questionable assumptions about independent observations); include a quadratic term for exports. Report the coefficients and their standard errors, together with R’s p-values. Which ones are found to be significant at the 5% level?
 
+```{r}
+head(war)
+exports2 <- war$exports^2
+logmodel <- glm(start ~ exports + exports2 + schooling + growth + peace + concentration + lnpop +fractionalization + dominance, data = war, family = binomial)
+summary(logmodel)
+```
+Exports, exports^2, schooling, growth, peace, concentration, lnpop and fractionalization are all significant at the 95% confidence level. 
+
 
 2)Interpretation: All parts of this question refer to the logistic regression model you just fit.
 
 a)What is the model’s predicted probability for a civil war in India in the period beginning 1975? What probability would it predict for a country just like India in 1975, except that its male secondary school enrollment rate was 30 points higher? What probability would it predict for a country just like India in 1975, except that the ratio of commodity exports to GDP was 0.1 higher?
 
+```{r}
+logmodel.probs = predict(logmodel, type = "response")
+
+india1975 <- filter(war, country == "India", year =="1975")
+india1975$exports2 = india1975$exports^2
+
+indiapred <- predict(logmodel, india1975, type = "response")
+indiapred
+
+likeindia <- india1975 %>% 
+  mutate(schooling = schooling + 30)
+
+likeindiapred <- predict(logmodel, likeindia , type = "response")
+likeindiapred
+
+likeindia2 <- india1975 %>% 
+  mutate(exports = exports + .1)
+likeindia2$exports2 = likeindia2$exports^2
+
+likeindiapred2 <- predict(logmodel, likeindia2 , type = "response")
+likeindiapred2
+
+```
+
+The predicted probability for a civil war in India in the period begining in 1975 was 35%. If the only difference was a school enrollmentrat that wa 30 points higher then the predicted probability of civil war would go down to 17%. With the higher ratio of commodity exports the predicted probability went up to around 70%.
+
+
 b)What is the model’s predicted probability for a civil war in Nigeria in the period beginning 1965? What probability would it predict for a country just like Nigeria in 1965, except that its male secondary school enrollment rate was 30 points higher? What probability would it predict for a country just like Nigeria in 1965, except that the ratio of commodity exports to GDP was 0.1 higher?
+
+```{r}
+nigeria1965 <- filter(war, country == "Nigeria", year =="1965")
+nigeria1965$exports2 = nigeria1965$exports^2
+nigeria1965
+
+nigeriapred <- predict(logmodel, nigeria1965, type = "response")
+nigeriapred
+
+
+likenigeria <- nigeria1965 %>% 
+  mutate(schooling = schooling + 30)
+
+likenigeriapred <- predict(logmodel, likenigeria , type = "response")
+likenigeriapred
+
+likenigeria2 <- nigeria1965 %>% 
+  mutate(exports = exports + .1)
+likenigeria2$exports2 = likenigeria2$exports^2
+
+likenigeriapred2 <- predict(logmodel, likenigeria2 , type = "response")
+likenigeriapred2
+
+```
+
+The predicted probability for a civil war in Nigeria in the period begining in 1965 was 17%. With the higher schooling rate the probability drops to around 7.4%. Finally with the greater exports to GDP ration the predicted probability goes to around 33%. 
+
 
 c)In the parts above, you changed the same predictor variables by the same amounts. If you did your calculations properly, the changes in predicted probabilities are not equal. Explain why not. (The reasons may or may not be the same for the two variables.)
 
+Unlike a linear model, the slope is not constant on a logistic model for any given value of x. 
+
+
 3)Confusion: Logistic regression predicts a probability of civil war for each country and period. Suppose we want to make a definite prediction of civil war or not, that is, to classify each data point. The probability of misclassification is minimized by predicting war if the probability is ≥ 0.5, and peace otherwise.
+
+
 
 a)Build a 2 × 2 confusion matrix (a.k.a. “classification table” or “contigency table”) which counts: the number of outbreaks of civil war correctly predicted by the logistic regression; the number of civil wars not predicted by the model; the number of false predictions of civil wars; and the number of correctly predicted absences of civil wars. (Note that some entries in the table may be zero.)
 
 b)What fraction of the logistic regression’s predictions are incorrect, i.e. what is the misclassification rate? (Note that this is if anything too kind to the model, since it’s looking at predictions to the same training data set).
 
 c)Consider a foolish (?) pundit who always predicts “no war”. What fraction of the pundit’s predictions are correct on the whole data set? What fraction are correct on data points where the logistic regression model also makes a prediction?
+
+
 
 4)Comparison: Since this is a classification problem with only two classes, we can compare Logistic Regression right along side Discriminant Analysis.
 
