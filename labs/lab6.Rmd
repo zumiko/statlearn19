@@ -244,7 +244,7 @@ The number of observations n is 100. p would be two since there are two coeffici
 
 $$y = x - 2x^{2} + \epsilon $$
 
-(b) Create a scatterplot of X against Y . Comment on what you find.
+(b) Create a scatterplot of X against Y. Comment on what you find.
 
 ```{r}
 summary(x1)
