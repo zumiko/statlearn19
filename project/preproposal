@@ -1,0 +1,13 @@
+
+
+1) Which reviews on yelp attract the most attention? What features make them more popular? Regression. Descriptive. Yelp has shared this data so it is packaged nicely. Here is the link: https://www.kaggle.com/yelp-dataset/yelp-dataset#Dataset_Challenge_Dataset_Agreement.pdf
+
+2)Can user questions on stack overflow be used to track which techonologies are becoming more popular? Regression. Predictive.  https://www.kaggle.com/stackoverflow/stackoverflow
+
+3) Maybe some type of audio processing related project. Know there is a program they use in linguistics that does a lot of feature extraction for you with an audio clip. Would be interested in playing say different types of tv (like sitcom vs horror vs news) to see if it could categorize based on intonation. Classification. Predictive.
+
+
+
+https://www.kaggle.com/pascalbliem/european-social-survey-ess-8-ed21-201617#ESS8e02.1_F1.csv
+
+Interested in potentially working with Ryan Kobler and Jacob Goldsmith. 
