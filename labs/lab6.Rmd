@@ -12,7 +12,7 @@ library(ggplot2)
 library(colorspace)
 ```
 
-go back and fix number 2 in a simple model 
+
 
 
 ```{r}
@@ -85,7 +85,7 @@ MSE_all
 mean(MSE_all)
 ```
 
-The MSE of this model based on 5-fold CV is 0.001867706. 
+The MSE of this model based on 5-fold CV is around 0.00187.
 
 
 ### Inverting a variable
@@ -168,7 +168,7 @@ for(i in 1:5000) {
 ```{r}
 dfnew <- data.frame(betas)
 ggplot(dfnew, aes(betas)) +
-  geom_histogram(col = "white") + geom_vline(xintercept = .98)
+  geom_histogram(col = "white") + geom_vline(xintercept = mean(betas))
 ```
 
 
