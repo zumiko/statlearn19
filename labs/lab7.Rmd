@@ -9,8 +9,10 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
 
+```{r}
+library(randomForest)
+```
 
 
 ```{r}
@@ -90,7 +92,6 @@ set.seed(39)
 Yes, this tree differs quite a lot from the previous tree. The previous tree using gini for splitting criteria, only predicted circles or squares and had three leaves. This tree has two leaves and predicts circles and triangles. The split is also a higher value and close to what many groups did in class. The split is different because it is trying to minimize different criteria. 
 
 
-
 ### 3. Growing a pruned regression tree
 
 Crime and Communities, revisited
@@ -113,7 +114,10 @@ treecrime <- tree(ViolentCrimesPerPop ~ racePctWhite
           + PctVacantBoarded 
           + PctImmigRec8 
           + PctIlleg 
-          + PctHousOccup, 
+          + PctHousOccup 
+          + population 
+          + householdsize
+          + medIncome, 
            data = dcrime)
 
 plot(treecrime)
@@ -134,7 +138,7 @@ ptree
 plot(ptree$size, ptree$dev, type = "b")
 ```
 
-Looks like the largest tree was the best at reducing the deviance. 
+Looks like the tree with size 13 was the best at reducing the deviance.  
 ```{r}
 ptree$size[which.min(ptree$dev)]
 ptreebest <- prune.tree(treecrime, k = NULL, best =13, dcrime,
@@ -177,22 +181,78 @@ regmodel <- lm(data = dcrime, ViolentCrimesPerPop ~
           + PctVacantBoarded 
           + PctImmigRec8 
           + PctIlleg 
-          + PctHousOccup)
+          + PctHousOccup
+          + population 
+          + householdsize
+          + medIncome)
 
 MSEreg <- MSE(regmodel, test_data)
 MSEreg
 
 ```
 
-In this case the MSE for the tree model is better than the MSE for the regression model. This could be due to the fact that the functional form of our data is not well approximated by a linear model.
+In this case the MSE for the tree model is better than the MSE for the regression model. This could be due to the fact that the functional form of our data is not well approximated by a linear model. However, the two are not that far apart. 
 
 ### 5. Growing a random forest
 
-We now apply methods to decrease the variance of our estimates. Fit a randomForest() model that performs only bagging and no actual random forests (recall that bagging is the special case of random forests with (m = p)). Next, fit a second random forest model that uses (m = p/3). Compute their test MSEs. Is this an improvement over the vanilla pruned regression tree? Does it beat your regression model?
+We now apply methods to decrease the variance of our estimates. Fit a randomForest() model that performs only bagging and no actual random forests (recall that bagging is the special case of random forests with $m = p$). Next, fit a second random forest model that uses $m = p/3$. Compute their test MSE's. Is this an improvement over the vanilla pruned regression tree? Does it beat your regression model?
 
 ```{r}
+rforest <- randomForest(ViolentCrimesPerPop ~ racePctWhite 
+          + pctUrban  
+          + PctEmploy 
+          + MalePctDivorce 
+          + PctKids2Par 
+          + PctWorkMom 
+          + PctPersDenseHous 
+          + NumStreet 
+          + PctVacantBoarded 
+          + PctImmigRec8 
+          + PctIlleg 
+          + PctHousOccup
+          + population 
+          + householdsize
+          + medIncome, 
+           data = dcrime, mtry = 15)
 
 ```
+
+```{r}
+rforest
+plot(rforest)
+```
+
+
+```{r}
+rforest2 <- randomForest(ViolentCrimesPerPop ~ racePctWhite 
+          + pctUrban  
+          + PctEmploy 
+          + MalePctDivorce 
+          + PctKids2Par 
+          + PctWorkMom 
+          + PctPersDenseHous 
+          + NumStreet 
+          + PctVacantBoarded 
+          + PctImmigRec8 
+          + PctIlleg 
+          + PctHousOccup
+          + population 
+          + householdsize
+          + medIncome, 
+           data = dcrime)
+```
+Since originally we had 15 predictors in the model, the random forest is considering 5 at each split. 
+```{r}
+rforest2
+plot(rforest2)
+```
+
+```{r}
+MSE(rforest, test_data)
+MSE(rforest2, test_data)
+```
+
+The test MSE is way better than with the regression model or the pruned tree. It appears that the test MSE for the random forest where m = p is very slightly lower, perhaps if I had included more of the predictors that would not be the case. 
 
 
 ### 6. Variance importance
@@ -200,8 +260,78 @@ We now apply methods to decrease the variance of our estimates. Fit a randomFore
 One thing we lose by using these computational techniques to limit the variance is the clearly interpretable tree diagram. We can still salvage some interpretability by considering importance(). Please construct a Variable Importance Plot (varImpPlot()). Are these restults similar/different from your interpretation of your regression coefficients in Lab 3?
 
 ```{r}
-
+varImpPlot(rforest)
 ```
+
+
+```{r}
+regm <- lm( ViolentCrimesPerPop ~ racePctWhite 
+          + pctUrban  
+          + PctEmploy 
+          + MalePctDivorce 
+          + PctKids2Par 
+          + PctWorkMom 
+          + PctPersDenseHous 
+          + NumStreet 
+          + PctVacantBoarded 
+          + PctImmigRec8 
+          + PctIlleg 
+          + PctHousOccup
+          + population 
+          + householdsize
+          + medIncome, 
+           data = dcrime)
+summary(regm)
+```
+
+The two appear similar however there are some notable differences. The variables racePctWhite and Pct Illeg are the second and third most important variables in the random forest and similarly are very significant with relatively large coefficients in the regression linear model. The variable PctKids2Par shows up as the most important variable but lacks significance despite having a largeish coefficient in the linear model. Overall, the two clearly correspond to some degree. 
+
+### Two Cultures 
+
+1)What are the two cultures outlined by Breiman?
+
+One culture assumes that data are generated by some stochastic data model (this includes linear and logistic regression type models). The other doesn’t make that kind of assumption about knowing the true form, and rather uses algorithmic models. 
+
+2)Is the Ozone Project supervised or unsupervised? Classification or Regression? Which methods that we’ve seen could be used to tackle this problem?
+
+It was supervised and used regression analysis. Perhaps, binary trees would work better for that data or some form of discriminant analysis. 
+
+3)What is the name of the model/method that is discussed in equation (R) of section 5.1?
+
+That is the assumed functional form for linear regression. 
+
+4)In section 5.4 he states, “If the model has too many parameters, then it may overfit the data and give a biased estimate of accuracy”. Where would this model be in terms of the bias-variance tradeoff?
+
+This would lean towards high variance and low bias since the model is overly complex. 
+
+5)What is the Rashoman effect? Did you run into this effect is question 5 from the last lab?
+
+It is possible to have a large number of models with different parameters that yield about the same RSS. This could also arise with trees when the data used is slightly different. 
+
+6)Explain how one of the techniques that we’ve covered could be seen to invoke Occam’s Razor.
+
+Linear regression is very easy to interpret, however it might not be the best predictor depending on the structure of the data. 
+
+7)The most illuminating point for me in this paper was…
+
+“For a data model, this translates as: fit the parameters in your model by using the data, then, using the model, predict the data and see how good the prediction is.” I hadn’t thought about it like that before as going backward through the model mechanism to generate the data. 
+
+8)The most confusing point for me in this paper was…
+ 
+I thought the section on Bellman and the curse of dimensionality was somewhat confusing. 
+ 
+9)Which of the responses (Cox, Efron, Hoadley, Parzen) do you find the most incisive? Why?
+ 
+I liked Hoadley’s response about how algorithmic models can be highly contextual and only have really good predictive ability on a sample of the data. It seems to me that algorithmic models may be less desirable when data collection was not carried out well (small or biased sample), since no functional form about how the variables should cooperate is assumed. 
+ 
+10)Which do you think is the strongest single criticism of Breiman’s paper that is levelled by the commentators?
+ 
+Cox seems to have the greatest disagreement with the paper and I like his point about how understanding the approximating relationship between variables is important when you want to know about a somewhat related question but have to make use of existing data sources. 
+ 
+11)The big ticket question: in your area of study, if you had to use methods from only one of Breiman’s cultures for the rest of your life, which would it be: Data Model or Algorithmic Model?
+ 
+I’d probably choose the data model because it seems much more likely I’ll use it in the future, although I do agree that algorithmic models are probably generally better since they don’t seem as subject to faulty assumptions of form. 
+
 
 
 
