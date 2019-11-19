@@ -1,0 +1,205 @@
+---
+title: "Lab 8: Ransom notes keep falling"
+author: "Claire Jellison"
+date: "11/16/2019"
+output: pdf_document
+---
+
+
+```{r}
+lettersdf <- read.csv("https://raw.githubusercontent.com/stat-learning/course-materials/master/data/letters.csv",
+                      header = FALSE)
+summary(lettersdf)
+```
+
+```{r}
+set.seed(1)
+train <- sample(1:nrow(lettersdf), nrow(lettersdf) * .75)
+```
+
+### Building a boosted tree
+
+Contruct a boosted tree to predict the class of the training images (the letters) based on its 16 features. This can be done with the gbm() function in the library of the same name. Look to the end of chapter 8 for an example of the implementation. Note that we’ll be performing a boosted classification tree. It’s very similar to the boosted regression tree except the method of calculating a residual is adapted to the classification setting. Please use as your model parameters $B = 50$, $\lambda = 0.1$, and $d = 1$. Note that this is computationally intensive, so it may take a minute to run. Which variable is found to be the most important?
+
+```{r}
+library(gbm)
+set.seed (1)
+boostwrite=gbm(V1 ~.,data=lettersdf[train,],distribution=
+"multinomial", n.trees=50, interaction.depth=1, shrinkage = 0.1)
+summary(boostwrite)
+```
+The most important variable appears to be V13 by a decent margin. 
+
+### Assessing predictions
+
+Now use this boosted model to predict the classes of the images in the test data set. Use the same number of trees and be sure to add the argument type = "response". The output of this will be a 5000 X 26 X 1 array: for each image you’ll have a predicted probability that it is from each of the 26 classes. To extract the vector of length 5000 of each final predicted class, you can use the following function.
+
+```{r}
+yhats <- predict(boostwrite, newdata = lettersdf[-train,], type = "response", n.trees = 50)
+predictedboost <- LETTERS[apply(yhats, 1, which.max)]
+predictedboost
+
+```
+
+
+1)Build a cross-tabulation of the predicted and actual letters (a 26 X 26 confusion matrix).
+
+
+
+```{r}
+testdata <- lettersdf[-train,]
+confusionm <- table(predictedboost, testdata$V1 )
+confusionm
+```
+
+
+
+#https://github.com/stat-learning/course-materials/blob/master/slides/week-06/lda.Rmd
+
+2)What is your misclassification rate? (the function diag() might be helpful)
+
+
+```{r}
+diag <- diag(confusionm)
+missclass <-  1 - ((1/nrow(testdata)) * (sum(diag)))
+missclass
+```
+The missclassification rate is 0.3198. 
+
+3)What letter was most difficult to predict?
+
+
+```{r}
+confusiondf <- as.matrix(confusionm)
+missclassbyl <- rep(NA, 26)
+for (i in 1: 26){
+missclassbyl[i] <- 1 - ((1/sum(confusiondf[, i])) * diag[i])
+} 
+missclassbyl
+
+which.max(missclassbyl)
+
+```
+
+The most missclassfied letter appears to be E the fifth letter.
+
+4)Are there any letter pairs that are particularly difficult to distinguish?
+
+```{r}
+pairs <- function(matrix) {
+max = 0 
+letter1 = 0 
+letter2 = 0
+for (i in 1: 26){ #iterate through all matrix ijth entries
+  for (j in 1: 26)
+    if (matrix[i, j] + matrix[j,i] > max & i!=j ){ # look for pairings with largest off diagonal sums
+      max = matrix[i, j] + matrix[j,i] 
+      letter1 = i 
+      letter2 = j }
+}
+out <- cbind(letter1, letter2, max)
+out
+}
+```
+
+```{r}
+pairs(confusiondf)
+```
+
+B and D appear to be particularly difficult to distinguish. 
+
+
+### Slow the learning
+
+Build a second boosted tree model that uses even slower learners, that is, decrease $\lambda$ and increase $B$ somewhat to compensate (the slower the learner, the more of them we need). Pick the parameters of your choosing for this, but be wary of trying to fit a model with too high a $B$. You don’t want to wait an hour for your model to fit.
+
+```{r}
+set.seed (1)
+boostwriteslow=gbm(V1 ~.,data=lettersdf[train,],distribution=
+"multinomial", n.trees=100, interaction.depth=1, shrinkage = 0.01)
+summary(boostwriteslow)
+```
+
+
+1)How does the misclassification rate compare to the rate from you original model?
+
+```{r}
+yhatslow=predict(boostwriteslow,newdata=lettersdf[-train,], n.trees = 50, type = "response")
+predicted2 <- LETTERS[apply(yhatslow, 1, which.max)] 
+#predicted2
+
+confusionmslow <- table(predicted2, testdata$V1 )
+confusiondfslow <- as.matrix(confusionmslow)
+#confusionmslow
+
+diagslow <- diag(confusiondfslow)
+missclassslow <-  1 - ((1/nrow(testdata)) * (sum(diagslow)))
+missclassslow
+
+```
+
+The missclassification rate is significantly higher than it was before (rose from 0.3198 to 0.5734). It now missclassifies the majority of observations. 
+
+2)Are there any letter pairs that became particularly easier/more difficult to distinguish?
+
+```{r}
+pairs(confusiondfslow)
+```
+
+B and D are still some of the more difficult letters to distinguish and now the model is even worse at distinguishing them and missclassified more of them. 
+
+
+### Communities and Crime (One last boost)
+
+Construct a model based on a boosted tree with parameters of your choosing. How does the test MSE compare to your existing models (Bagged Trees, Random Forests, etc.)?
+
+
+```{r}
+set.seed(9)
+dfcrime <- read.csv("http://andrewpbray.github.io/data/crime-train.csv")
+trainc <- sample(1:nrow(dfcrime), nrow(dfcrime) * .75)
+boostcrime=gbm(ViolentCrimesPerPop ~.,data=dfcrime[trainc,], distribution=
+"gaussian", n.trees=100, interaction.depth=2, shrinkage = .01)
+```
+
+```{r}
+yhatcrime=predict(boostcrime,newdata=dfcrime[-trainc,], n.trees= 50, type = "response")
+yhatcrime
+```
+
+```{r}
+MSEtree <- function(yhats, data){
+  n <- nrow(data)
+  ys <- data$ViolentCrimesPerPop 
+  residuals <- yhats - ys
+  MSE <- sum(residuals^2)/n
+  MSE
+}
+```
+
+```{r}
+MSEtree(yhatcrime, dfcrime[-trainc,])
+```
+The test MSE for this model is 0.04878. My random forest model had a test MSE of 0.003587 so it preformed better than this model (looking back at this code though I accidently used the same data to train and test it). The regular regression model had a test MSE of 0.01888 so it also preformed better than this model. The single tree model had an MSE of 0.01708644 which is also better than this model. 
+
+### Chapter 8 exercises
+
+5) Suppose we produce ten bootstrapped samples from a data set containing red and green classes. We then apply a classification tree to each bootstrapped sample and, for a specific value of X, produce 10 estimates of $P(Class is Red|X)$:0.1, 0.15, 0.2, 0.2, 0.55, 0.6, 0.6, 0.65, 0.7, and 0.75. There are two common ways to combine these results together into a single class prediction. One is the majority vote approach discussed in this chapter. The second approach is to classify based on the average probability. In this example, what is the final classification under each of these two approaches?
+
+By the majority vote criteria we would classify this as red because there are 6 values of probability that the class is red given X that are greater than .5, meaning that the majority suggest that it is red. 
+
+Neverthless, by the average probability criteria we would classify it as green. In the chunk below we see that the mean probability that it is red given the specific value of X is .45 which is less than .50 so by this criteria we would classify it as green. 
+
+```{r}
+estimates <- c(0.1, 0.15, 0.2, 0.2, 0.55, 0.6, 0.6, 0.65, 0.7, 0.75)
+mean(estimates)
+
+```
+
+6) Provide a detailed explanation of the algorithm that is used to fit a regression tree.
+
+The first step involves partitioning the predictor space. This is done through recursive binary splitting which is a top down approach since we begin with the whole predictor space and then split the space at some cutoff point that decreases the RSS by the most across all the potential cutoff points of all the predictors. Each time a line is drawn across the predictor space two new regions are formed, we continue the splitting process on one of the newly created regions each time until we hit some stopping criterion (such as none of the regions have more than a certain number of observations).
+
+The next step involves predicting a response for a test observation that falls within any of the regions created by our partition, which we compute as the mean of all the training observations within that region.
+
+
