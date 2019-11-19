@@ -9,7 +9,7 @@ output: pdf_document
 ```{r}
 lettersdf <- read.csv("https://raw.githubusercontent.com/stat-learning/course-materials/master/data/letters.csv",
                       header = FALSE)
-summary(lettersdf)
+#summary(lettersdf)
 ```
 
 ```{r}
@@ -37,7 +37,7 @@ Now use this boosted model to predict the classes of the images in the test data
 ```{r}
 yhats <- predict(boostwrite, newdata = lettersdf[-train,], type = "response", n.trees = 50)
 predictedboost <- LETTERS[apply(yhats, 1, which.max)]
-predictedboost
+#predictedboost
 
 ```
 
@@ -164,7 +164,7 @@ boostcrime=gbm(ViolentCrimesPerPop ~.,data=dfcrime[trainc,], distribution=
 
 ```{r}
 yhatcrime=predict(boostcrime,newdata=dfcrime[-trainc,], n.trees= 50, type = "response")
-yhatcrime
+#yhatcrime
 ```
 
 ```{r}
