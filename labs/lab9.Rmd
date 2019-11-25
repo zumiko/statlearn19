@@ -1,0 +1,108 @@
+---
+title: "lab9"
+author: "Claire Jellison"
+date: "11/20/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(dplyr)
+library(ggplot2)
+```
+
+
+
+
+```{r}
+dhand <- read.csv("https://raw.githubusercontent.com/stat-learning/course-materials/master/data/handwritten.csv")
+```
+
+  
+```{r}
+plot_letter <- function(x, hasletter = TRUE) {
+  if(hasletter) {
+    a <- as.numeric(x[, -1])
+  }else{a <- as.numeric(x)}
+  m <- matrix(a, nrow = 8, byrow = TRUE)
+  m <- t(apply(m, 2, rev)) # rotate matrix
+  par(mar = rep(0, 4))
+  image(m, axes = FALSE, col = rev(grey(seq(0, 1, length = 256)))) #this should be a divergent palette
+  box()
+}
+```
+
+```{r}
+pc_grid <- function(pca, data) {
+  d <- data
+  grid_points <- as.matrix(expand.grid(seq(-1.5, 1.5, length.out = 5), 
+                                       seq(-1.5, 1.5, length.out = 5)))
+  pc_points <- pca$x[, 1:2]
+  nearest_ind <- rep(NA, nrow(grid_points))
+  for(i in 1:nrow(grid_points)) {
+    gp <- matrix(rep(grid_points[i, ], nrow(pc_points)), 
+                 ncol = 2, byrow = TRUE)
+    nearest_ind[i] <- which.min(rowSums((pc_points - gp)^2))
+  }
+  nearest_grid <- data.frame(d[nearest_ind, ])
+  par(mfrow = c(5, 5))
+  regrid <- c(21:25, 16:20, 11:15, 6:10, 1:5)
+  for(i in regrid) {
+    plot_letter(nearest_grid[i, ])
+  }
+}
+```
+
+
+```{r}
+head(dhand)
+```
+The rows represent letters and the columns represent whether certain pixels are colored in. 
+
+The letter I chose is M. This is how a couple of the M's look. 
+```{r}
+dm <- dhand[2,]
+dm2 <- dhand[3,]
+plot_letter(dm)
+plot_letter(dm2)
+```
+
+This is the compilation of the average "M". 
+```{r}
+dms <- dhand %>% filter(letter == "m")
+dim(dms)
+meanl <- colMeans(x=dms[, -1], na.rm = TRUE)
+meanl
+plot_letter(meanl, hasletter = FALSE)
+```
+
+
+Looking at the principle components. 
+```{r}
+
+pca <- prcomp(dms[, -1])
+dd <- as.data.frame(pca$x)
+p1 <- ggplot(dd, aes(x = PC1, y = PC2)) +
+  geom_point(size = 3) +
+  xlim(c(-3, 3)) +
+  theme_bw(base_size = 18)
+p1
+```
+
+Looking at proportion of variance explained by each PC with a scree plot. 
+```{r}
+d <- data.frame(PC = 1:4,
+                PVE = pca$sdev^2 /
+                  sum(pca$sdev^2))
+ggplot(d, aes(x = PC, y = PVE)) +
+  geom_line() + 
+  geom_point()
+```
+
+
+```{r}
+pc_grid(pca, dms)
+```
+
+
+
