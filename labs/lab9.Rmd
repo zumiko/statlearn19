@@ -105,4 +105,13 @@ pc_grid(pca, dms)
 ```
 
 
+```{r}
+rotation <- pca$rotation
+dim(rotation)
+rotation
+plot_letter(rotation[, 4], hasletter = FALSE)
+plot_letter(rotation[, 3], hasletter = FALSE)
+plot_letter(rotation[, 1], hasletter = FALSE)
+plot_letter(rotation[, 2], hasletter = FALSE)
+```
 
