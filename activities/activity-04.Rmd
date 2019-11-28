@@ -97,6 +97,8 @@ d <- data.frame(PC = 1:4,
 ggplot(d, aes(x = PC, y = PVE)) +
   geom_line() + 
   geom_point()
+
+dim(d)
 ```
 
 
@@ -113,5 +115,26 @@ plot_letter(rotation[, 4], hasletter = FALSE)
 plot_letter(rotation[, 3], hasletter = FALSE)
 plot_letter(rotation[, 1], hasletter = FALSE)
 plot_letter(rotation[, 2], hasletter = FALSE)
+```
+
+```{r}
+dim(dms)
+z <- pca$x
+phi <- rotation[]
+```
+
+
+
+```{r}
+meanl # this is the mean letter 
+phi <- pca$rotation
+z <- pca$x 
+ncomp <-20
+phitilda <- t(phi[ ,1:ncomp]) 
+ztilda <- z[1, 1:ncomp]
+
+firstm <- meanl + ztilda%*%phitilda
+plot_letter(firstm, hasletter = FALSE)
+
 ```
 
