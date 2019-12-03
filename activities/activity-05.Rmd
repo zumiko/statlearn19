@@ -1,0 +1,70 @@
+---
+title: "activity 5"
+author: "Claire Jellison"
+date: "12/2/2019"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+d <- read.delim("https://bit.ly/381pd5e")
+```
+
+```{r}
+head(d)
+```
+
+
+
+```{r}
+set.seed(9)
+k<- c(2, 3, 4)
+dk <- d %>% select(-State)
+cluster2 <- kmeans(dk, 2)
+cluster3 <- kmeans(dk, 3)
+cluster5 <- kmeans(dk, 5)
+```
+
+```{r}
+head(cluster2$cluster)
+```
+
+
+```{r}
+pca <- prcomp(dk)
+attributes(pca)
+
+```
+
+```{r}
+pcad <- pca$x
+pcad <- as.matrix(pcad)
+pca1 <- pcad[, 1]
+pca2 <- pcad[, 2]
+
+```
+
+
+```{r}
+dfcluster <- cbind(pca1, pca2)
+head(dfcluster)
+
+framcluster <- as.data.frame(dfcluster)
+framcluster$cluster <- cluster2$cluster
+framcluster$cluster3 <- cluster3$cluster
+framcluster$cluster5 <- cluster5$cluster
+framcluster$state <- d$State
+head(framcluster)
+```
+
+```{r}
+ggplot(framcluster, aes(x=pca1, y=pca2, label = state)) + geom_point(aes(col = as.factor(cluster))) +geom_text(aes(label=state),hjust=0, vjust=0)
+ggplot(framcluster, aes(x=pca1, y=pca2, label = state)) + geom_point(aes(col = as.factor(cluster3)))+geom_text(aes(label=state),hjust=0, vjust=0)
+ggplot(framcluster, aes(x=pca1, y=pca2, label = state)) + geom_point(aes(col = as.factor(cluster5)))+geom_text(aes(label=state),hjust=0, vjust=0)
+```
+
+
