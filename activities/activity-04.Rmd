@@ -53,10 +53,6 @@ pc_grid <- function(pca, data) {
 }
 ```
 
-
-```{r}
-head(dhand)
-```
 The rows represent letters and the columns represent whether certain pixels are colored in. 
 
 The letter I chose is M. This is how a couple of the M's look. 
@@ -98,7 +94,6 @@ ggplot(d, aes(x = PC, y = PVE)) +
   geom_line() + 
   geom_point()
 
-dim(d)
 ```
 
 
@@ -117,14 +112,7 @@ plot_letter(rotation[, 1], hasletter = FALSE)
 plot_letter(rotation[, 2], hasletter = FALSE)
 ```
 
-```{r}
-dim(dms)
-z <- pca$x
-phi <- rotation[]
-```
-
-
-
+Here, we are reconstructing an "M" from the principle compenents. The more be include the closer it looks to the original letter. 
 ```{r}
 meanl # this is the mean letter 
 phi <- pca$rotation
@@ -137,4 +125,65 @@ firstm <- meanl + ztilda%*%phitilda
 plot_letter(firstm, hasletter = FALSE)
 
 ```
+
+#Now for a new letter
+Since "M" is fairly complex with straight lines we will choose "O" as our next letter. 
+
+```{r}
+dos <- dhand %>% filter(letter == "o")
+head(dos)
+plot_letter(dos[1, ])
+```
+
+
+#Creating a scree plot 
+
+There is no obvious elbow in the scree plot. 
+```{r}
+pcao <- prcomp(dos[, -1])
+dd <- as.data.frame(pcao$x)
+po1 <- ggplot(dd, aes(x = PC1, y = PC2)) +
+  geom_point(size = 3) +
+  xlim(c(-3, 3)) +
+  theme_bw(base_size = 18)
+po1
+
+do <- data.frame(PC = 1:4,
+                PVE = pcao$sdev^2 /
+                  sum(pcao$sdev^2))
+ggplot(do, aes(x = PC, y = PVE)) +
+  geom_line() + 
+  geom_point()
+
+```
+
+
+#Creating a letter grid of the first two loadings 
+
+
+```{r}
+pc_grid(pcao, dos)
+```
+
+
+```{r}
+plot_letter(pcao$rotation[,1], hasletter = FALSE)
+plot_letter(pcao$rotation[,2], hasletter = FALSE)
+```
+
+The first principle component seems to be encoding to a certain extent how flat the "O"'s are and the other is maybe like how wide they are. 
+
+#Reconstructing first observed letter
+
+```{r}
+omean <- colMeans(dos[, -1])
+phio <- pcao$rotation
+z <- pcao$x
+ncompo <- 10
+x_star1 <- omean + z[1, 1:ncompo] %*% t(phio[, 1:ncompo])
+plot_letter(x_star1)
+```
+
+I think that this look slightly less intact than my construction of the letter "M". This is somewhat surprising to me because in the Scree plot for "O" we see that the two first principle components do a better job explaining the variance than with the letter "M", so maybe it just happens to be worse for this specific "O". 
+
 
